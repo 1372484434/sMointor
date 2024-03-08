@@ -20,7 +20,7 @@
 
 ### 整体
 
-![framework](framework.png)
+![framework](图片1.png)
 
 
 ### 子窗口1：
