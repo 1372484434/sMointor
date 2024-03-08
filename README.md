@@ -25,8 +25,8 @@
 
 ### 子窗口1：
 
-![framework](framework.png)
+![framework](图片2.png)
 
 ### 子窗口2：
 
-![framework](framework.png)
+![framework](图片3.png)
