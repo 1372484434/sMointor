@@ -1,0 +1,126 @@
+#include "steng.h"
+#include<QTime>
+
+//初始化云台设备
+// 这行代码打开了一个设备文件，通过 open() 系统调用，它试图打开一个名为 dev 的设备文件，并以读写模式打开。
+// 通常情况下，dev 是指向设备文件的路径，这个路径指向了之前编写的 Linux 内核驱动程序的接口。
+// 在驱动程序加载后，这个接口会创建一个设备文件，应用程序可以通过该文件与驱动程序进行通信
+setEng::setEng()
+{
+    angfd=open(dev,O_RDWR);
+    if(angfd<0) qDebug()<<"open steng dev fail";
+}
+
+
+void setEng::whileall(int v){
+
+}
+//控制云台的过程是利用开发版定时器输出pwm脉冲，即可实现角度he
+//速度的控制（具体细节为利用系统调用ioctl函数，先将对应的GPIO口通过IO映射到对应的虚拟地址，用控制ioctl参数大小控制pwm占空比，即可控制角度；
+//速度是通过参数的变化速度快慢来控制），由于这部分小蚁的老师Jason已经帮我们做好了驱动，所以我们只需要直接insmod对应的ko文件即可
+
+//设置云台初始角度
+void setEng::backLrpos()
+{
+    angLR=75;
+    ioctl(angfd,angLR,TURN_LR_CTL);
+}
+
+
+void setEng::backUdpos()
+{
+    angUD=67;
+    ioctl(angfd,angUD,TURN_UD_CTL);
+}
+
+
+//控制左右偏转角度
+void setEng::turnLeft()
+{
+    angLR--;
+    if(angLR<=25) angLR=25;
+    ioctl(angfd,angLR,TURN_LR_CTL);
+}
+
+void setEng::turnRight()
+{
+    angLR++;
+    if(angLR>=125) angLR=125;
+    ioctl(angfd,angLR,TURN_LR_CTL);
+}
+
+void setEng::setLrAngle(int angle)
+{
+    angLR=angle+25;
+    if(angLR<=25) angLR=25;
+    if(angLR>=125) angLR=125;
+    ioctl(angfd,angLR,TURN_LR_CTL);
+}
+
+int setEng::getLrAngle()
+{
+    return angLR-25;
+}
+
+//控制上下偏转角度
+void setEng::turnUp()
+{
+    angUD--;
+    if(angUD<=17) angUD=17;
+    ioctl(angfd,angUD,TURN_UD_CTL);
+}
+
+void setEng::turnDown()
+{
+
+    angUD++;
+    if(angUD>=117) angUD=117;
+    ioctl(angfd,angUD,TURN_UD_CTL);
+}
+
+void setEng::setUdAngle(int angle)
+{
+    angUD=angle+17;
+    if(angUD<=17) angUD=17;
+    if(angUD>=117) angUD=117;
+    ioctl(angfd,angUD,TURN_UD_CTL);
+
+}
+
+int setEng::getUdAngle()
+{
+    return angUD-17;
+}
+
+double setEng::turnLeft(double off_set3)
+{
+    angLR=angLR-(off_set3)*Kp;
+    if(angLR<25) angLR=25;
+    ioctl(angfd,angLR,TURN_LR_CTL);
+    return angLR;
+}
+
+double setEng::turnRight(double off_set4)
+{
+    angLR=angLR-(off_set4)*Kp;
+    if(angLR>125)  angLR=125;
+    ioctl(angfd,angLR,TURN_LR_CTL);
+    return angLR;
+}
+
+double setEng::turnDown(double off_set3){
+    angUD =angUD + (off_set3)* Kp;
+        if(angUD>=117) angUD=117;
+        ioctl(angfd,angUD,TURN_UD_CTL);
+        return angUD;
+}
+
+double setEng::turnUp(double off_set4){
+    angUD=angUD + (off_set4) * Kp;
+        if(angUD<=17) angUD=17;
+        ioctl(angfd,angUD,TURN_UD_CTL);
+        return angUD;
+}
+
+
+

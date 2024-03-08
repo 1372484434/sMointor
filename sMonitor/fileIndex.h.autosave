@@ -1,0 +1,81 @@
+#ifndef FILEINDEX
+#define FILEINDEX
+
+
+
+#include <QMainWindow>
+#include <QListWidgetItem>
+#include <QListWidget>
+#include <QDir>
+#include <QLabel>
+#include "fullShow.h"
+#include "click_lable.h"
+#include <QMenu>
+#include <QDebug>
+
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/core/core.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/videoio.hpp>
+#include <opencv2/objdetect.hpp>
+#include <opencv2/face.hpp>
+using namespace std;
+using namespace cv;
+
+namespace Ui {
+class fileIndex;
+}
+
+class fileIndex : public QMainWindow
+{
+    Q_OBJECT
+
+public:
+    explicit fileIndex(QWidget *parent = 0);
+    ~fileIndex();
+    void updatePicData(QString p_name);
+    void updataVidData(QString vp_name,QString v_name);
+
+
+signals:
+    void give_message(QPixmap message);
+    void give_vedname(QString ved_name);
+//    这是一个类中声明的私有槽（private slots）。在Qt中，槽函数是用来响应特定事件或信号的函数。
+    
+//    具体来说：
+    
+//    slot_itemClicked(QListWidgetItem * item): 当列表项被点击时触发的槽函数。
+//    on_picWidget_customContextMenuRequested(const QPoint &pos): 当用户请求自定义上下文菜单时触发的槽函数，picWidget应该是一个自定义小部件，可能是一个窗口部件，以便在特定位置（pos）显示自定义上下文菜单。
+//    on_vidWidget_customContextMenuRequested(const QPoint &pos): 当用户请求自定义视频小部件上下文菜单时触发的槽函数。
+//    on_exit_bt_clicked(): 当退出按钮被点击时触发的槽函数。
+//    pic_deleteSeedSlot(): 当执行删除种子操作时触发的槽函数。
+//    pic_xiugai(): 当执行修改图片操作时触发的槽函数。
+//    vid_deleteSeedSlot(): 当执行删除视频种子操作时触发的槽函数。
+//    vid_xiugai(): 当执行修改视频操作时触发的槽函数。
+//    这些槽函数通常用于处理用户界面中的事件或执行特定的操作，比如响应用户的点击、右键菜单请求、按钮点击等。由于它们是私有的槽函数，只能在该类的实现中调用或关联信号。
+private slots:
+     void slot_itemClicked(QListWidgetItem * item);
+     void on_picWidget_customContextMenuRequested(const QPoint &pos);
+     void on_vidWidget_customContextMenuRequested(const QPoint &pos);
+     void on_exit_bt_clicked();
+     void pic_deleteSeedSlot( );
+    void pic_xiugai();
+    void vid_deleteSeedSlot( );
+   void vid_xiugai();
+private:
+    Ui::fileIndex *ui;
+
+    QString picPath,pvPath,vidPath;
+    QStringList picList;      // 文件目录下所有的图像文件名
+    QStringList vidList;      // 文件目录下所有的图像文件名
+    fullShow *msg;
+    QStringList filters;
+
+    QFont font;
+    QSize IMAGE_SIZE;
+    QSize ITEM_SIZE;
+    QListWidgetItem *picitem;
+    QListWidgetItem *viditem;
+};
+#endif // FILEINDEX
+

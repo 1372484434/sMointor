@@ -1,0 +1,106 @@
+#include "mythread.h"
+
+#include <QDebug>
+
+myThread::myThread()
+{
+
+}
+//使用多线程的好处：提高应用程序响应速度、使CPU更加高效、改善程序结构。
+//在Qt中使用QThread来管理线程。Qt中使用线程时，需要自己实现一个thread的类。
+//mythread.h和mythread.cpp是自定义的线程类，需要改为继承自QThread，QThread类有一个虚函数run()，它就是线程处理函数，我们需要重写它。
+//当我们调用QThread的start()函数时，会间接的调用run()函数。
+
+//这个线程的主要目的是实现舵机的自动旋转。在 run() 函数中，通过不断地检测舵机当前的角度和状态变量，来决定舵机的转动方向和速度，从而实现自动旋转的功能。
+//这种自动旋转是根据预先设定的条件和算法来执行的，而不是由用户手动控制的。
+
+//用户手动控制舵机的转动通常会在界面上设置相应的按钮或者控件，用户通过点击按钮或者操作控件来实现舵机的手动转动。但在这个线程中，并没有针对手动控制舵机转动的逻辑。
+void myThread::run()
+{
+    bool turn_left=true;
+    bool turn_right=false;
+    bool turn_down=true;
+    bool turn_up=false;
+    this->flag=true;
+//    根据舵机的当前角度和状态变量，控制舵机的转动方向和速度。主要逻辑如下：
+    
+//    根据舵机当前的角度判断是否需要改变转动方向，并进行相应的转动控制。
+//    通过 Qt 中的 QTime 类实现非阻塞延时，保证界面不会卡住。
+//    控制舵机的转动方向，调用 sEng 对象的相应方法实现舵机的转动。
+//    在每次转动后，通过 QTime 实现延时，控制转动的速度。
+    
+//    循环不断地执行以上步骤，直到 this->flag 的值发生变化，循环结束，线程退出。
+    
+    
+    while(1){
+        if(this->flag==true){
+
+        }else{
+            break;
+        }
+        if(this->sEng->angLR>=125){
+            turn_left=true;
+            turn_right=false;
+            QTime _Timer=QTime::currentTime().addMSecs(v+100);   //Qt实现非阻塞延时的方法,延时150毫秒  非阻塞延时：在延时的过程中，可以进行其他操作，保证界面不会卡住
+            while(QTime::currentTime()<_Timer);
+
+
+        }
+        if(this->sEng->angLR<=25){
+            turn_left=false;
+            turn_right=true;
+            QTime _Timer=QTime::currentTime().addMSecs(v+100);
+            while(QTime::currentTime()<_Timer);
+
+
+        }
+        if(this->sEng->angUD>=90){
+            turn_up=true;
+            turn_down=false;
+            QTime _Timer=QTime::currentTime().addMSecs(v+100);
+            while(QTime::currentTime()<_Timer);
+
+        }
+        if(this->sEng->angUD<=40){
+            turn_down=true;
+            turn_up=false;
+            QTime _Timer=QTime::currentTime().addMSecs(v+100);
+            while(QTime::currentTime()<_Timer);
+
+        }
+        if(turn_down){
+          this->sEng->turnDown();
+          QTime _Timer=QTime::currentTime().addMSecs(v);
+          while(QTime::currentTime()<_Timer);
+
+
+
+        }
+        if(turn_left){
+            this->sEng->turnLeft();
+            QTime _Timer=QTime::currentTime().addMSecs(v);
+            while(QTime::currentTime()<_Timer);
+
+
+        }
+        if(turn_right){
+            this->sEng->turnRight();
+            QTime _Timer=QTime::currentTime().addMSecs(v);
+            while(QTime::currentTime()<_Timer);
+
+
+
+
+        }
+        if(turn_up){
+            this->sEng->turnUp();
+            QTime _Timer=QTime::currentTime().addMSecs(v);
+            while(QTime::currentTime()<_Timer);
+
+
+
+
+        }
+    }
+}
+

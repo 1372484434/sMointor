@@ -1,0 +1,281 @@
+
+#include "frackthread.h"
+
+#include <QDebug>
+
+frackthread::frackthread()
+{
+
+}
+//这是 run() 函数的实现，是 QThread 类中的虚函数，用于执行线程的主要逻辑。在这个函数中：
+
+//加载人脸识别和眼睛识别的分类器文件。
+//将一些复选框设置为选中状态。
+//打开摄像头。
+//等待1秒。
+//进入一个无限循环，在循环中调用 CaptureOpen() 函数进行视频捕获和处理。
+
+
+//在 frackthread::run() 函数中进入一个无限循环，然后在循环中调用 CaptureOpen() 函数进行视频捕获和处理的目的:是保持视频捕获和处理的持续性。
+
+//视频捕获和处理通常需要持续运行，以实时地处理摄像头捕获的视频流。因此，通过在一个无限循环中调用 CaptureOpen() 函数，可以不断地从摄像头中读取视频帧，并对其进行处理。
+//这种持续的视频处理方式常用于实时应用，比如视频监控、人脸识别、姿态估计等。
+
+//在循环中调用 CaptureOpen() 函数可以确保视频捕获和处理的持续性，直到线程被终止或摄像头被关闭。
+void frackthread::run()
+{
+    //利用QT支持的opencv库，里面的人脸识别模块，已经有两个训练好的分类器（由老师提供）
+    //放在指定文件夹加上相应的代码即可实现人脸识别。具体的实现过程是利用Haar特征，介绍如下：
+    //Haar-like特征模板内只有白色和黑色两种矩形，并定义该模板的特征值为白色矩形像素和减去黑色矩形像素和。
+    //Haar特征值反映了图像的灰度变化情况。例如：脸部的一些特征能由矩形特征简单的描述,
+    //如：眼睛要比脸颊颜色要深，鼻梁两侧比鼻梁颜色要深，嘴巴比周围颜色要深等。
+    //但矩形特征只对一些简单的图形结构，如边缘、线段较敏感，所以只能描述特定走向（水平、垂直、对角）的结构。
+    cascade1.load("./haarcascade_frontalface_alt.xml");
+    nestedCascade1.load("./haarcascade_eye_tree_eyeglasses.xml");
+    this->checkbox->setChecked(true);
+    this->checkbox3->setChecked(true);
+    this->checkbox5->setChecked(true);
+
+
+    cap.open(0);  // //打开摄像头
+
+    sleep(1);
+//    不断调用 CaptureOpen() 函数的目的之一是为了将捕获到的图像帧持续展示在界面上。
+//            在每次调用 CaptureOpen() 函数时，摄像头捕获到的最新图像帧会被处理并显示在界面上，实现了实时视频显示的效果。
+    while(1){
+      CaptureOpen();
+    }
+
+
+
+}
+
+void frackthread::CaptureOpen(){
+
+    if(test1)
+    {
+// 打开一个视频文件并设置视频的帧率和大小
+        //writer 对象用于创建一个视频文件并将视频帧写入其中。具体来说，writer 对象通过调用 open() 方法来打开一个视频文件以便写入，然后通过 << 运算符将视频帧写入文件中。
+//        视频帧是视频文件的基本组成单位，它是由一系列连续的图像帧组成的。每一帧都是一个静止的图像，当这些帧以足够的速度连续播放时，就会呈现出动态的视频画面。
+        
+//        在视频文件中，每一帧都包含了一定时间段内的图像信息。通过在视频文件中按顺序播放这些帧，就可以呈现出连续的视频画面。
+        //视频帧可以包含多种信息，例如图像像素数据、颜色信息、运动信息等，这些信息共同构成了视频文件的内容。
+        
+//        因此，当我们创建一个视频文件并将视频帧写入其中时，实际上是将一系列图像帧按照特定的编码方式存储在视频文件中，以便后续播放和处理。
+        
+ //::如果 test1 为真，打开视频文件并设置相关参数。
+//        从摄像头中读取一帧图像。
+//        调用人脸跟踪和眼睛跟踪的函数。
+//        将图像转换为 Qt 可以显示的格式，并更新界面上的图像显示。
+//        如果 VidFlag 为假，将帧写入视频文件。
+    string str = "./video/";
+    str += "01.avi";
+    writer.open(str,CV_FOURCC('M', 'J', 'P', 'G') ,30.0, Size(640,480),true);  //Qt+OpenCV 读取摄像头视频并保存
+    
+    //Qt+OpenCV 读取摄像头视频并保存
+    //第一个参数：输出视频文件名，可以指定输出路径
+    //第二个参数：用于压缩帧的编码器的4个字符的代码
+    //第三个参数：创建的视频流的帧率
+    //第四个参数：每帧视频的大小
+    //第五个参数：如果它不为零，则编码器将编码彩色帧，否则为灰度帧（仅Windows当前支持该标志）
+    
+    //VideoCapture既支持从视频文件(.avi ， .mpg格式)读取，也支持直接从摄像机(比如电脑自带摄像头)中读取。
+            //要想获取视频需要先创建一个VideoCapture对象，VideoCapture对象的创建方式有以下三种： 
+    
+    //【方式一】是从文件（.MPG或.AVI格式）中读取视频，对象创建以后，OpenCV将会打开文件并做好准备读取它，
+            //如果打开成功，我们将可以开始读取视频的帧，并且cv::VideoCapture的成员函数isOpened()将会返回true
+
+   
+   
+    //MJPG
+    if(!(writer.isOpened()))   //VideoWriter类 如果不能成功打开(也就是说 .isOpened()返回为false),
+    {
+    cout << "videowriter open fail"<<endl;
+    }
+    cout << "yes" <<endl;
+
+    }
+    test1 = 0;
+    cap >>frame;  //cap >> frame;意思是：从cap中读取数据到frame中,这里的frame是opencv中特有的数据类型： Mat类型。// 从摄像头中读取一帧图像
+    // 调用人脸跟踪和眼睛跟踪的函数
+    face_tracking();
+    eye_tracking();
+    
+    
+// 将图像转换为 Qt 可以显示的格式，并更新界面上的图像显示
+    Mat frame1;//创建一个名为 frame1 的 OpenCV Mat 对象，用于存储经过颜色转换后的图像帧。
+    cvtColor(frame,frame1,CV_BGR2RGB);//将摄像头捕获的图像帧 frame 从 BGR（蓝绿红）颜色空间转换为 RGB（红绿蓝）颜色空间，并保存到 frame1 中。
+
+    QImage Qimage1 = QImage((const unsigned char *)(frame1.data),
+                    frame1.cols, frame1.rows,
+                    frame1.step,QImage::Format_RGB888);//根据颜色转换后的图像帧 frame1 创建一个 Qt QImage 对象 Qimage1，以便在 Qt 界面中显示。
+    QImage mirroredImage = Qimage1.mirrored(true, false);//创建一个水平翻转的图像 
+    this->grea->setPixmap(QPixmap::fromImage(mirroredImage));//将翻转后的图像 mirroredImage 显示在程序界面上的 grea 标签中，grea 是一个 QLabel 控件。
+        //ui->cap_Frame_lb->resize(Qimage1.size());
+    this->grea->show();//显示 QLabel 控件，即显示摄像头捕获的图像帧。
+    
+// 如果 VidFlag 为 false，将帧写入视频文件
+    if(!VidFlag)
+    {
+    //次数可以调整视频的帧数
+    *writer2 << frame;
+    *writer2 << frame;
+    *writer2 << frame;
+    *writer2 << frame;
+    }//在实际应用中，有时候需要确保视频文件中每一帧的持续时间相对较长，或者为了增加视频的帧率，可以将同一帧图像多次写入视频文件。这样可以使得视频播放时的效果更加流畅或者更加稳定。
+}
+
+void frackthread::face_tracking(void){//利用识别出来的x,y坐标位置，判断处于屏幕的哪一处，做出相应的旋转
+    int i = 0;
+    double t = 0;id run();// 初始化一个变量 t 为 0，用于计时。
+    vector<Rect> faces, faces2;//定义两个存储矩形区域的向量，用于存储检测到的人脸和其他信息。
+    const static Scalar colors[] = { CV_RGB(0,0,255),//定义了一组颜色，用于绘制检测到的人脸的边界框。
+                                     CV_RGB(0,128,255),
+                                     CV_RGB(0,255,255),
+                                     CV_RGB(0,255,0),
+                                     CV_RGB(255,128,0),
+                                     CV_RGB(255,255,0),
+                                     CV_RGB(255,0,0),
+                                     CV_RGB(255,0,255)} ;
+    Mat gray1,smallImg(cvRound(frame.rows/scale1), cvRound(frame.cols/scale1), CV_8UC1 );//定义了两个图像矩阵 gray1 和 smallImg，用于存储灰度图和缩小尺寸后的图像。
+    cvtColor(frame, gray1, CV_BGR2GRAY );//将彩色图像转换为灰度图像
+    cv::resize(gray1, smallImg, Size(frame.cols / 3, frame.rows / 3));//将灰度图像缩小尺寸，以加快人脸检测的速度。
+    equalizeHist( smallImg, smallImg );// 对图像进行直方图均衡化，增强图像对比度。
+
+    t = (double)cvGetTickCount();
+
+    cascade1.detectMultiScale( smallImg, faces,//使用 Haar 特征级联分类器检测人脸，将检测结果存储在 faces 向量中。
+                               1.6, 3, 0
+                               |CV_HAAR_SCALE_IMAGE
+                               ,Size(30, 30));
+      t = (double)cvGetTickCount() - t;
+      for( vector<Rect>::const_iterator r = faces.begin(); r != faces.end(); r++, i++ )//遍历检测到的人脸
+       {
+         Mat smallImgROI;
+          vector<Rect> nestedObjects;
+          static Point center;
+           int radius;
+           double aspect_ratio = (double)r->width/r->height;
+            if( 0.75 < aspect_ratio && aspect_ratio < 1.3 )
+             {
+                 center.x = cvRound((r->x + r->width*0.5)*scale1)*1.5;//计算人脸中心点的 x 坐标。
+                 center.y = cvRound((r->y + r->height*0.5)*scale1)*1.5;//计算人脸中心点的 y 坐标。
+                  radius = cvRound((r->width + r->height)*0.25*scale1)*1.5;//计算人脸的半径。
+                  //绘制检测到的人脸区域。
+                  circle(frame, center, radius, Scalar(0,0,255), 3, 8, 0 );//根据人脸中心点的位置计算 x、y 偏移量，并根据偏移量进行相应的旋转。
+
+                  double x_offset,y_offset;
+                  double length;
+                  if(center.x<frame.rows&& center.y<frame.cols){//根据人脸半径计算距离，并根据不同距离采取不同措施，如拍照或录像。
+                      x_offset=((((double)center.x)/(double)frame.rows)-0.65)*2;
+                      y_offset=((((double)center.y)/(double)frame.cols)-0.4)*2;
+                      length=72780/radius;
+                      cout<<"length:"<<length<<endl;
+                      cout<<"radius:"<<radius<<endl;
+                      cout<<"x_offset:"<<x_offset<<" "<<"y_offset:"<<y_offset<<endl;
+                      cout<<"frame.row:"<<frame.rows<<" "<<"frame.cols:"<<frame.cols<<endl;
+                      cout<<"center.x"<<center.x<<" "<<"center.y:"<<center.y<<endl;
+                  }
+//首先判断 x_offset 是否大于 0 且小于等于 1，这表示人脸在摄像头视野的右侧，且偏移量不超过一个单位（可能是一个比例）。如果满足条件，则调用 sEng 对象的 turnRight() 方法，传入 x_offset 参数，可能是用来控制摄像头向右转动。
+                      if((x_offset>0)&&(x_offset<=1)){
+                          this->sEng->turnRight(x_offset);
+                      }
+                      if((x_offset<0)&&(x_offset>=-1)){
+                          this->sEng->turnLeft(x_offset);
+                      }
+
+                      if((y_offset>0)&&(y_offset<=1)){
+                          this->sEng->tupicPathrnDown(y_offset);
+                      }
+                      if((y_offset<0)&&(y_offset>=-1)){
+                          this->sEng->turnUp(y_offset);
+                      }
+
+                      //利用识别出来的半径大小和length = 72950/radius 这条公式，即可得到人脸距离摄像头的距离。然后根据这个距离，即可设置ABC三个防区
+                      //distance2=5,distance1=10;
+                      //pai zhao
+                      if((length/100)<distance1&&(length/100)>distance2){
+
+                          QDateTime curDateTime=QDateTime::currentDateTime();
+                          string strr= "./photo/";
+                          strr += curDateTime.toString("yyyy-MM-dd|hh:mm:ss").toStdString();
+                          strr +=".jpg";
+                          imwrite(strr,frame);
+                          this->checkbox->setChecked(false);
+                          this->checkbox2->setChecked(true);
+
+
+
+                       //lu xiang
+                      }
+                      if((length/100)<distance2){
+                          this->checkbox3->setChecked(false);
+                          this->checkbox4->setChecked(true);
+                          writer << frame;
+                          writer << frame;
+                          writer << frame;
+                          writer << frame;
+                          writer << frame;
+                          writer << frame;
+                          writer << frame;
+                          writer << frame;
+                          writer << frame;
+
+
+                      }
+
+              }
+              else
+                 cout << "no face" <<endl;
+
+            if( nestedCascade1.empty())
+                   continue;
+      }
+}
+
+
+void frackthread::eye_tracking(void){
+    int i = 0;//打开视频,以上两句等价于VideoCapture cap("E://2.avi");
+    double t = 0;
+    vector<Rect> faces, faces2;
+    const static Scalar colors[] = { CV_RGB(0,0,255),
+                                     CV_RGB(0,128,255),
+                                     CV_RGB(0,255,255),
+                                     CV_RGB(0,255,0),
+                                     CV_RGB(255,128,0),
+                                     CV_RGB(255,255,0),
+                                     CV_RGB(255,0,0),
+                                     CV_RGB(255,0,255)} ;
+    Mat gray1,smallImg(cvRound(frame.rows/scale1), cvRound(frame.cols/scale1), CV_8UC1 );
+    cvtColor(frame, gray1, CV_BGR2GRAY );
+    cv::resize(gray1, smallImg, Size(frame.cols / 3, frame.rows / 3));
+    equalizeHist( smallImg, smallImg );
+
+    t = (double)cvGetTickCount();
+
+    nestedCascade1.detectMultiScale( smallImg, faces,
+                               1.6, 3, 0
+                               |CV_HAAR_SCALE_IMAGE
+                               ,Size(30, 30));
+      t = (double)cvGetTickCount() - t;
+      for( vector<Rect>::const_iterator r = faces.begin(); r != faces.end(); r++, i++ )
+       {
+         Mat smallImgROI;
+          vector<Rect> nestedObjects;
+          static Point center;
+           int radius;
+           double aspect_ratio = (double)r->width/r->height;
+            if( 0.75 < aspect_ratio && aspect_ratio < 1.3 )
+             {
+                 center.x = cvRound((r->x + r->width*0.5)*scale1)*1.5;
+                 center.y = cvRound((r->y + r->height*0.5)*scale1)*1.5;
+                  radius = cvRound((r->width + r->height)*0.25*scale1)*1.5;
+                  circle(frame, center, radius, Scalar(0,0,255), 3, 8, 0 );
+              }
+              else
+                 cout << "no face" <<endl;
+
+            if( cascade1.empty())
+                   continue;
+      }
+}
