@@ -20,12 +20,13 @@
 
 ### 整体
 
-<img src="C:\Users\DELL\AppData\Roaming\Typora\typora-user-images\image-20240308191551845.png" alt="image-20240308191551845" style="zoom:80%;" />
+![framework](framework.png)
+
 
 ### 子窗口1：
 
-<img src="C:\Users\DELL\AppData\Roaming\Typora\typora-user-images\image-20240308191400807.png" alt="image-20240308191400807" style="zoom:80%;" />
+![framework](framework.png)
 
 ### 子窗口2：
 
-<img src="C:\Users\DELL\AppData\Roaming\Typora\typora-user-images\image-20240308191348203.png" alt="image-20240308191348203" style="zoom:80%;" />
+![framework](framework.png)
